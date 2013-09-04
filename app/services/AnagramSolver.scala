@@ -3,26 +3,38 @@
  */
 package services
 
+import org.ardverk.collection.{StringKeyAnalyzer, PatriciaTrie}
+
 class AnagramSolver(_dictionary: Set[String]) {
 
-  lazy val dictionary = _dictionary.map(_.toLowerCase())
+  val trie = new PatriciaTrie[String, Unit](StringKeyAnalyzer.INSTANCE)
+  _dictionary.map(_.toLowerCase()) foreach (s => trie.put(s, ()))
+
+  def dictionary(s: String) = trie.select(s).getKey == s
+  def prefix(s: String) = trie.select(s).getKey.startsWith(s)
 
   def solve(s: String): List[String] =
-    solve("", Nil, s.toList.filter(_ != ' ').map(_.toLower))
+    solve("", Nil, s.toList.filter(_ != ' ').map(_.toLower)).distinct
 
   def solve(x: String, acc: List[String], xs: List[Char]): List[String] =
     xs match {
       case Nil =>
-        if (dictionary.contains(x))
+        if (dictionary(x))
           (x :: acc).reverse.mkString(" ") :: Nil
         else
           Nil
       case _ =>
-        val s = x + xs.head
-        if (dictionary.contains(s))
-          solve("", s :: acc, xs.tail) ::: solve(s, acc, xs.tail)
-        else
-          solve(s, acc, xs.tail)
+        (for (i <- 0 to xs.length - 1) yield {
+          val c = xs.lift(i).get
+          val remain = xs.take(i) ::: xs.takeRight(xs.length - i - 1)
+          val s = x + c
+          if (dictionary(s))
+            solve("", s :: acc, remain) ::: solve(s, acc, remain)
+          else if (prefix(s))
+            solve(s, acc, remain)
+          else
+            Nil
+        }).toList.flatten
     }
 
 }

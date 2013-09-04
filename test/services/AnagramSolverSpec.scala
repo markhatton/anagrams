@@ -8,14 +8,15 @@ import org.specs2.mutable.SpecificationWithJUnit
 class AnagramSolverSpec extends SpecificationWithJUnit {
 
   val dictionary = Set("a", "b", "c", "ab", "bc")
-  val solutions = Set("a b c", "a bc", "ab c")
+  val solutions = Set("a b c", "b a c", "b c a", "b a c", "a c b", "c b a", "a bc", "c a b", "ab c", "bc a", "c ab")
 
   val anagramSolver = new AnagramSolver(dictionary)
 
   "An Anagrams Solver" should {
 
-    "solve a simple anagram"  in {
+    "solve anagrams"  in {
       anagramSolver.solve("abc").toSet must_== solutions
+      anagramSolver.solve("bac").toSet must_== solutions
     }
 
     "disregard spaces in input" in {
