@@ -1,0 +1,7 @@
+@(solver: services.AnagramSolver, s: String)
+
+@main("Welcome to Play") {
+
+    @play20.welcome(solver.solve(s).mkString(", "))
+
+}
