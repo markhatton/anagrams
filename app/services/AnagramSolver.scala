@@ -3,10 +3,12 @@
  */
 package services
 
-class AnagramSolver(dictionary: Set[String]) {
+class AnagramSolver(_dictionary: Set[String]) {
+
+  lazy val dictionary = _dictionary.map(_.toLowerCase())
 
   def solve(s: String): List[String] =
-    solve("", Nil, s.toList.filter(_ != ' '))
+    solve("", Nil, s.toList.filter(_ != ' ').map(_.toLower))
 
   def solve(x: String, acc: List[String], xs: List[Char]): List[String] =
     xs match {

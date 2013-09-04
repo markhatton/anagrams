@@ -22,6 +22,10 @@ class AnagramSolverSpec extends SpecificationWithJUnit {
       anagramSolver.solve("a b c").toSet must_== solutions
     }
 
+    "ignore case" in {
+      new AnagramSolver(dictionary map (_.toUpperCase())).solve("AbC").toSet must_== solutions
+    }
+
     "return no solutions" in {
       anagramSolver.solve("abcd") must_== Nil
     }
