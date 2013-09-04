@@ -11,3 +11,24 @@ project/plugins/project/
 
 # Scala-IDE specific
 .scala_dependencies
+
+# IntelliJ specific
+/.idea
+/*.iml
+/.idea_modules
+
+# Eclipse specific
+/.classpath
+/.project
+/.settings
+
+# Play specific
+logs
+project/project
+project/target
+target
+tmp
+.history
+dist
+/out
+/RUNNING_PID
