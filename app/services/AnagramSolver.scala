@@ -24,17 +24,21 @@ class AnagramSolver(_dictionary: Set[String]) {
         else
           Nil
       case _ =>
-        (for (i <- 0 to xs.length - 1) yield {
+      {
+        for (i <- 0 to xs.length - 1) yield {
+
           val c = xs.lift(i).get
-          val remain = xs.take(i) ::: xs.takeRight(xs.length - i - 1)
           val s = x + c
+          lazy val remain = xs.take(i) ::: xs.takeRight(xs.length - i - 1)
+
           if (dictionary(s))
             solve("", s :: acc, remain) ::: solve(s, acc, remain)
           else if (prefix(s))
             solve(s, acc, remain)
           else
             Nil
-        }).toList.flatten
+        }
+      }.toList.flatten
     }
 
 }
