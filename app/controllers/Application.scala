@@ -9,17 +9,23 @@ import java.io.File
 object Application extends Controller {
 
   lazy val anagramSolver = {
-//    val dictFile = "/usr/share/dict/words"
-    val dictFile = "/Users/markhatton/words"
+    val filename = Option(System.getProperty("dictionary")).getOrElse("/usr/share/dict/words")
+
+    if (!new File(filename).exists) sys error s"unable to load input dictionary file: $filename"
     val dictionary = {
+      Logger.info(s"Loading dictionary from file: $filename")
       val ss = Set("a", "i")
-      Source.fromFile(dictFile).getLines().filterNot(s => s.length == 1 && !ss.contains(s)).toSet
+      Source.fromFile(filename).getLines().filterNot(s => s.length == 1 && !ss.contains(s)).toSet
     }
     new AnagramSolver(dictionary)
   }
 
   lazy val sorter = {
-    val csvFile = new File("/Users/markhatton/unigrams")
+    val filename = Option(System.getProperty("unigrams")).getOrElse("/Users/markhatton/unigrams")
+
+    val csvFile = new File(filename)
+    if (!csvFile.exists()) sys error s"unable to load input CSV file: $filename"
+    Logger.info(s"Loading unigrams from file: $filename")
     new AnagramSorter(new BinarySearchCSV(csvFile))
   }
 
@@ -30,7 +36,7 @@ object Application extends Controller {
   def solve = Action { request =>
     request.getQueryString("s") match {
       case None =>
-        BadRequest
+        Redirect("/", 301)
       case Some(s) =>
         Ok(views.html.solve(anagramSolver, sorter, s))
     }

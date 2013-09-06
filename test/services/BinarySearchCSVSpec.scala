@@ -10,8 +10,10 @@ class BinarySearchCSVSpec extends SpecificationWithJUnit {
 
   "A Binary Search CSV" should {
 
-    val file = new File(this.getClass.getClassLoader.getResource("unigrams.csv").getFile)
-    val csv = new BinarySearchCSV(file)
+    val csv = {
+      val fileOpt = Option(this.getClass.getClassLoader.getResource("unigrams.csv"))
+      new BinarySearchCSV(new File(fileOpt.getOrElse(sys error "unable to load input CSV").getFile))
+    }
 
     "resolve CSV values" in {
       csv.find("acabados") must_== Some(1172)
