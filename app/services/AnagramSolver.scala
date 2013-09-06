@@ -15,7 +15,7 @@ class AnagramSolver(_dictionary: Set[String]) {
   def dictionary(s: String) = trie.select(s).getKey == s
   def prefix(s: String) = trie.select(s).getKey.startsWith(s)
 
-  def solve(s: String, limit: Int = 100): List[String] = {
+  def solve(s: String, limit: Int = 1000, timeoutMillis: Int = 5000): List[String] = {
     val chars = s.toLowerCase().toList.filter { c =>
       c >= 'a' && c <= 'z'
     }
@@ -23,11 +23,11 @@ class AnagramSolver(_dictionary: Set[String]) {
     val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (_, acc, _) => -acc.length})
     frontier += (("", Nil, chars))
 
-    solve(mutable.ListBuffer[String](), frontier, limit)
+    solve(mutable.ListBuffer[String](), frontier, limit, System.currentTimeMillis() + timeoutMillis)
   }
 
   @tailrec
-  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char])], limit: Int): List[String] =
+  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char])], limit: Int, timeoutAtMillis: Long): List[String] =
     if (frontier.isEmpty) {
       acc.toList
     } else {
@@ -51,8 +51,12 @@ class AnagramSolver(_dictionary: Set[String]) {
             else if (prefix(s))
               frontier += ((s, ws, remain))
           }
+
+          if (frontier.size % 50 == 0) // only check clock every ~50 iterations
+            if (System.currentTimeMillis() > timeoutAtMillis) return acc.toList
+
       }
-      solve(acc, frontier, limit)
+      solve(acc, frontier, limit, timeoutAtMillis)
     }
 
 }
