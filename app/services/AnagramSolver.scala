@@ -13,8 +13,12 @@ class AnagramSolver(_dictionary: Set[String]) {
   def dictionary(s: String) = trie.select(s).getKey == s
   def prefix(s: String) = trie.select(s).getKey.startsWith(s)
 
-  def solve(s: String): List[String] =
-    solve("", Nil, s.toList.filter(_ != ' ').map(_.toLower)).distinct
+  def solve(s: String): List[String] = {
+    val chars = s.toLowerCase().toList.filter { c =>
+      c >= 'a' && c <= 'z'
+    }
+    solve("", Nil, chars).distinct
+  }
 
   def solve(x: String, acc: List[String], xs: List[Char]): List[String] =
     xs match {

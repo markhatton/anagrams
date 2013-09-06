@@ -15,12 +15,17 @@ class AnagramSolverSpec extends SpecificationWithJUnit {
   "An Anagrams Solver" should {
 
     "solve anagrams"  in {
+      anagramSolver.solve("a") must_== List("a")
       anagramSolver.solve("abc").toSet must_== solutions
       anagramSolver.solve("bac").toSet must_== solutions
     }
 
-    "disregard spaces in input" in {
-      anagramSolver.solve("a b c").toSet must_== solutions
+    "deduplicate anagrams when repeated letters in input" in {
+      anagramSolver.solve("aa") must_== List("a a")
+    }
+
+    "disregard non-alpha characters in input" in {
+      anagramSolver.solve("a'b c! 100.").toSet must_== solutions
     }
 
     "ignore case" in {
