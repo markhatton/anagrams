@@ -52,7 +52,7 @@ class AnagramSolver(_dictionary: Set[String]) {
               frontier += ((s, ws, remain))
           }
 
-          if (frontier.size % 50 == 0) // only check clock every ~50 iterations
+          if (frontier.length % 50 == 0) // only check clock every ~50 iterations
             if (System.currentTimeMillis() > timeoutAtMillis) return acc.toList
 
       }
