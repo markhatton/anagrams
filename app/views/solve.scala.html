@@ -1,7 +1,42 @@
 @(solver: services.AnagramSolver, sorter: services.AnagramSorter, s: String)
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Anagram Solutions: @s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    <!-- Bootstrap -->
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+</head>
+<body>
 
-@main("Welcome to Play") {
+<div class="container">
+    <div class="page-header">
+        <h2>Anagram Solver</h2>
+    </div>
+    <form>
+        <p>Enter a word or phrase:
+            <input type="text" name="s" style="min-width: 400px" value="@s"></input>
+            <input type="submit" value="Go"/>
+        </p>
+    </form>
+    <h3>Anagrams of &quot;@s&quot;</h3>
+    @defining(sorter.sort(solver.solve(s)).take(100)) { solutions =>
+        @solutions match {
+            case Nil => {
+                <em>No anagrams found</em>
+            }
+            case _ => {
+                <ol id="solutions">
+                    @solutions.map { solution =>
+                        <li>@solution</li>
+                    }
+                </ol>
+            }
+        }
+    }
+</div>
 
-    @play20.welcome(sorter.sort(solver.solve(s)).mkString(", "))
-
-}
+</body>
+</html>
