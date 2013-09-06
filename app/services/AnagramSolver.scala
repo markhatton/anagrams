@@ -23,7 +23,7 @@ class AnagramSolver(_dictionary: Set[String]) {
     val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (_, acc, _) => -acc.length})
     frontier += (("", Nil, chars))
 
-    solve(mutable.ListBuffer[String](), frontier, limit).distinct
+    solve(mutable.ListBuffer[String](), frontier, limit)
   }
 
   @tailrec
@@ -34,8 +34,9 @@ class AnagramSolver(_dictionary: Set[String]) {
       val (w, ws, avail) = frontier.dequeue()
       avail match {
         case Nil =>
-          if (dictionary(w)) {
-            acc += (w :: ws).reverse.mkString(" ")
+          val solution = (w :: ws).reverse.mkString(" ")
+          if (dictionary(w) && !acc.contains(solution)) {
+            acc += solution
             if (acc.length > limit) return acc.toList
           }
         case _ =>
