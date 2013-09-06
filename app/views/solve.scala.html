@@ -22,7 +22,7 @@
         </p>
     </form>
     <h3>Anagrams of &quot;@s&quot;</h3>
-    @defining(sorter.sort(solver.solve(s)).take(100)) { solutions =>
+    @defining(sorter.sort(solver.solve(s)).filterNot(sol => sol.split(' ').toSet == s.split(' ').toSet)take(100)) { solutions =>
         @solutions match {
             case Nil => {
                 <em>No anagrams found</em>
