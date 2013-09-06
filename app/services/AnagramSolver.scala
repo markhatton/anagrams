@@ -15,26 +15,29 @@ class AnagramSolver(_dictionary: Set[String]) {
   def dictionary(s: String) = trie.select(s).getKey == s
   def prefix(s: String) = trie.select(s).getKey.startsWith(s)
 
-  def solve(s: String): List[String] = {
+  def solve(s: String, limit: Int = 100): List[String] = {
     val chars = s.toLowerCase().toList.filter { c =>
       c >= 'a' && c <= 'z'
     }
 
-    val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (_, acc, _) => acc.length})
+    val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (_, acc, _) => -acc.length})
     frontier += (("", Nil, chars))
 
-    solve(mutable.ListBuffer[String](), frontier).distinct
+    solve(mutable.ListBuffer[String](), frontier, limit).distinct
   }
 
   @tailrec
-  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char])]): List[String] =
+  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char])], limit: Int): List[String] =
     if (frontier.isEmpty) {
       acc.toList
     } else {
       val (w, ws, avail) = frontier.dequeue()
       avail match {
         case Nil =>
-          if (dictionary(w)) acc += (w :: ws).reverse.mkString(" ")
+          if (dictionary(w)) {
+            acc += (w :: ws).reverse.mkString(" ")
+            if (acc.length > limit) return acc.toList
+          }
         case _ =>
           for (i <- 0 to avail.length - 1) yield {
 
@@ -48,7 +51,7 @@ class AnagramSolver(_dictionary: Set[String]) {
               frontier += ((s, ws, remain))
           }
       }
-      solve(acc, frontier)
+      solve(acc, frontier, limit)
     }
 
 }
