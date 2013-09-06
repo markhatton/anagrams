@@ -4,6 +4,8 @@
 package services
 
 import org.ardverk.collection.{StringKeyAnalyzer, PatriciaTrie}
+import scala.collection.mutable
+import scala.annotation.tailrec
 
 class AnagramSolver(_dictionary: Set[String]) {
 
@@ -17,32 +19,36 @@ class AnagramSolver(_dictionary: Set[String]) {
     val chars = s.toLowerCase().toList.filter { c =>
       c >= 'a' && c <= 'z'
     }
-    solve("", Nil, chars).distinct
+
+    val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (_, acc, _) => acc.length})
+    frontier += (("", Nil, chars))
+
+    solve(mutable.ListBuffer[String](), frontier).distinct
   }
 
-  def solve(x: String, acc: List[String], xs: List[Char]): List[String] =
-    xs match {
-      case Nil =>
-        if (dictionary(x))
-          (x :: acc).reverse.mkString(" ") :: Nil
-        else
-          Nil
-      case _ =>
-      {
-        for (i <- 0 to xs.length - 1) yield {
+  @tailrec
+  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char])]): List[String] =
+    if (frontier.isEmpty) {
+      acc.toList
+    } else {
+      val (w, ws, avail) = frontier.dequeue()
+      avail match {
+        case Nil =>
+          if (dictionary(w)) acc += (w :: ws).reverse.mkString(" ")
+        case _ =>
+          for (i <- 0 to avail.length - 1) yield {
 
-          val c = xs.lift(i).get
-          val s = x + c
-          lazy val remain = xs.take(i) ::: xs.takeRight(xs.length - i - 1)
+            val c = avail.lift(i).get
+            val s = w + c
+            lazy val remain = avail.take(i) ::: avail.takeRight(avail.length - i - 1)
 
-          if (dictionary(s))
-            solve("", s :: acc, remain) ::: solve(s, acc, remain)
-          else if (prefix(s))
-            solve(s, acc, remain)
-          else
-            Nil
-        }
-      }.toList.flatten
+            if (dictionary(s))
+              frontier ++= Seq(("", s :: ws, remain), (s, ws, remain))
+            else if (prefix(s))
+              frontier += ((s, ws, remain))
+          }
+      }
+      solve(acc, frontier)
     }
 
 }
