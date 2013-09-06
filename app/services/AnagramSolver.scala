@@ -7,39 +7,42 @@ import org.ardverk.collection.{StringKeyAnalyzer, PatriciaTrie}
 import scala.collection.mutable
 import scala.annotation.tailrec
 
-class AnagramSolver(_dictionary: Set[String]) {
+class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
 
   private final val trie = {
-    val t = new PatriciaTrie[String, Unit](StringKeyAnalyzer.INSTANCE)
-    _dictionary.map(_.toLowerCase()) foreach (s => t.put(s, ()))
+    val t = new PatriciaTrie[String, Long](StringKeyAnalyzer.INSTANCE)
+    _dictionary.map(_.toLowerCase()) foreach (s => t.put(s, unigrams.find(s).getOrElse(1L)))
     t
   }
 
   @inline
-  private final def dictionary(s: String) = trie.containsKey(s)
+  private final def dictionary(s: String): Long =
+    if (trie.containsKey(s)) trie.selectValue(s) else 0
 
   @inline
   private final def prefix(s: String) = trie.select(s).getKey.startsWith(s)
 
-  def solve(s: String, limit: Int = 1000, timeoutMillis: Int = 10000): List[String] = {
+  private final val k = 1000000000L
+
+  def solve(s: String, limit: Int = 2500, timeoutMillis: Int = 5000): List[String] = {
     val chars = s.toLowerCase().toList.filter { c => c >= 'a' && c <= 'z'}
 
-    val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (w, ws, av) => -ws.length})
-    frontier += (("", Nil, chars))
+    val frontier = mutable.PriorityQueue[(String, List[String], List[Char], Long)]()(Ordering.by{case (w, ws, av, priority) => priority})
+    frontier += (("", Nil, chars, k))
 
     solve(mutable.ListBuffer[String](), frontier, limit, System.currentTimeMillis() + timeoutMillis)
   }
 
   @tailrec
-  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char])], limit: Int, timeoutAtMillis: Long): List[String] =
+  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char], Long)], limit: Int, timeoutAtMillis: Long): List[String] =
     if (frontier.isEmpty)
       acc.toList
     else {
-      val (w, ws, avail) = frontier.dequeue()
+      val (w, ws, avail, priority) = frontier.dequeue()
 
       if (avail.isEmpty) {
         lazy val solution = (w :: ws).reverse.mkString(" ")
-        if (dictionary(w) && !acc.contains(solution)) {
+        if (dictionary(w) > 0 && !acc.contains(solution)) {
           acc += solution
           if (acc.length > limit) return acc.toList
         }
@@ -48,16 +51,19 @@ class AnagramSolver(_dictionary: Set[String]) {
           val s = w + c
           lazy val remain = avail diff List(c)
 
-          if (dictionary(s))
-            frontier += (("", s :: ws, remain))
+          val unigramFreq = dictionary(s)
+          if (unigramFreq > 0) {
+            val _priority = -(ws.length + 1) * k + unigramFreq
+            frontier += (("", s :: ws, remain, _priority))
+          }
           if (prefix(s))
-            frontier += ((s, ws, remain))
+            frontier += ((s, ws, remain, priority))
         }
 
-        if (frontier.length % 1000 == 0 // only check clock every ~1000 iterations
-          && System.currentTimeMillis() > timeoutAtMillis) return acc.toList
       }
 
+      if (frontier.length % 100 == 0 // only check clock every ~100 iterations
+        && System.currentTimeMillis() > timeoutAtMillis) return acc.toList
       solve(acc, frontier, limit, timeoutAtMillis)
     }
 

@@ -3,18 +3,35 @@
  */
 package services
 
-class AnagramSorter(csv: BinarySearchCSV) {
+import collection.mutable
 
-  private def min(s: Array[String]) =
-    s.map(csv.find).flatten.min
+class AnagramSorter(unigrams: BinarySearchCSV) {
 
-  def sort(xs: List[String]): List[String] =
-    xs.sortWith{ case (a, b) =>
+  private def min(s: Array[String], memo: mutable.Map[String, Long]) =
+    s.map{ w =>
+      memo.getOrElse (w, {
+          val freq = unigrams.find(w).getOrElse(1L)
+          memo.put(w, freq)
+          freq
+        })
+    }.min
+
+  private def partitionAndTake(xs: List[String], p: Int, n: Int): List[String] =
+    xs.filter(_.split(' ').length == p).take(n)
+
+  def sort(xs: List[String]): List[String] = {
+    val memo = mutable.Map[String, Long]()
+    val sorted = xs.sortWith{ case (a, b) =>
       val as = a.split(' ')
       val bs = b.split(' ')
       if (as.length == bs.length)
-        min(as) > min(bs)
+        min(as, memo) > min(bs, memo)
       else
         bs.length > as.length
     }
+
+    {
+      for (n <- 1 to 10) yield partitionAndTake(sorted, n, 25)
+    }.flatten.toList
+  }
 }

@@ -4,13 +4,18 @@
 package services
 
 import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mock.Mockito
 
-class AnagramSolverSpec extends SpecificationWithJUnit {
+class AnagramSolverSpec extends SpecificationWithJUnit with Mockito {
 
   val dictionary = Set("a", "b", "c", "ab", "bc")
-  val solutions = Set("a b c", "b a c", "b c a", "b a c", "a c b", "c b a", "a bc", "c a b", "ab c", "bc a", "c ab")
 
-  val anagramSolver = new AnagramSolver(dictionary)
+  val unigrams = mock[BinarySearchCSV]
+  unigrams.find(any) returns None
+
+  val anagramSolver = new AnagramSolver(dictionary, unigrams)
+
+  val solutions = Set("a b c", "b a c", "b c a", "b a c", "a c b", "c b a", "a bc", "c a b", "ab c", "bc a", "c ab")
 
   "An Anagrams Solver" should {
 
@@ -29,7 +34,7 @@ class AnagramSolverSpec extends SpecificationWithJUnit {
     }
 
     "ignore case" in {
-      new AnagramSolver(dictionary map (_.toUpperCase())).solve("AbC").toSet must_== solutions
+      new AnagramSolver(dictionary map (_.toUpperCase()), unigrams).solve("AbC").toSet must_== solutions
     }
 
     "return no solutions" in {

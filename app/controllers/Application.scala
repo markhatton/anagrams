@@ -8,7 +8,16 @@ import java.io.File
 
 object Application extends Controller {
 
-  lazy val anagramSolver = {
+  val unigrams = {
+    val filename = Option(System.getProperty("unigrams")).getOrElse("/Users/markhatton/unigrams")
+    val unigramsFile = new File(filename)
+    if (!unigramsFile.exists()) sys error s"unable to load input CSV file: $filename"
+
+    Logger.info(s"Loading unigrams from file: $filename")
+    new BinarySearchCSV(unigramsFile)
+  }
+
+  val anagramSolver = {
     val filename = Option(System.getProperty("dictionary")).getOrElse("/usr/share/dict/words")
 
     if (!new File(filename).exists) sys error s"unable to load input dictionary file: $filename"
@@ -17,16 +26,11 @@ object Application extends Controller {
       val dictionary = Source.fromFile(filename).getLines()
       dictionary.filter{s => s.length > ShortWords.maxLength || ShortWords.toSet.contains(s)}.toSet
     }
-    new AnagramSolver(dictionary)
+    new AnagramSolver(dictionary, unigrams)
   }
 
-  lazy val sorter = {
-    val filename = Option(System.getProperty("unigrams")).getOrElse("/Users/markhatton/unigrams")
-
-    val csvFile = new File(filename)
-    if (!csvFile.exists()) sys error s"unable to load input CSV file: $filename"
-    Logger.info(s"Loading unigrams from file: $filename")
-    new AnagramSorter(new BinarySearchCSV(csvFile))
+  val sorter = {
+    new AnagramSorter(unigrams)
   }
 
   def index = Action {
