@@ -2,7 +2,7 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import services.{AnagramSorter, BinarySearchCSV, AnagramSolver}
+import services.{ShortWords, AnagramSorter, BinarySearchCSV, AnagramSolver}
 import scala.io.Source
 import java.io.File
 
@@ -14,8 +14,8 @@ object Application extends Controller {
     if (!new File(filename).exists) sys error s"unable to load input dictionary file: $filename"
     val dictionary = {
       Logger.info(s"Loading dictionary from file: $filename")
-      val ss = Set("a", "i")
-      Source.fromFile(filename).getLines().filterNot(s => s.length == 1 && !ss.contains(s)).toSet
+      val dictionary = Source.fromFile(filename).getLines()
+      dictionary.filter{s => s.length > ShortWords.maxLength || ShortWords.toSet.contains(s)}.toSet
     }
     new AnagramSolver(dictionary)
   }
