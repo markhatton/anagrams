@@ -9,18 +9,20 @@ import scala.annotation.tailrec
 
 class AnagramSolver(_dictionary: Set[String]) {
 
-  val trie = new PatriciaTrie[String, Unit](StringKeyAnalyzer.INSTANCE)
+  private final val trie = new PatriciaTrie[String, Unit](StringKeyAnalyzer.INSTANCE)
+
   _dictionary.map(_.toLowerCase()) foreach (s => trie.put(s, ()))
 
-  def dictionary(s: String) = trie.select(s).getKey == s
-  def prefix(s: String) = trie.select(s).getKey.startsWith(s)
+  private final def dictionary(s: String) = trie.select(s).getKey == s
+
+  private final def prefix(s: String) = trie.select(s).getKey.startsWith(s)
 
   def solve(s: String, limit: Int = 1000, timeoutMillis: Int = 5000): List[String] = {
     val chars = s.toLowerCase().toList.filter { c =>
       c >= 'a' && c <= 'z'
     }
 
-    val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (_, acc, _) => -acc.length})
+    val frontier = mutable.PriorityQueue[(String, List[String], List[Char])]()(Ordering.by{case (w, ws, av) => -ws.length})
     frontier += (("", Nil, chars))
 
     solve(mutable.ListBuffer[String](), frontier, limit, System.currentTimeMillis() + timeoutMillis)
@@ -40,11 +42,9 @@ class AnagramSolver(_dictionary: Set[String]) {
             if (acc.length > limit) return acc.toList
           }
         case _ =>
-          for (i <- 0 to avail.length - 1) yield {
-
-            val c = avail.lift(i).get
+          for (c: Char <- avail.toSet) yield {
             val s = w + c
-            lazy val remain = avail.take(i) ::: avail.takeRight(avail.length - i - 1)
+            lazy val remain = avail diff List(c)
 
             if (dictionary(s))
               frontier ++= Seq(("", s :: ws, remain), (s, ws, remain))
