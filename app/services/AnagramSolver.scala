@@ -20,15 +20,15 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
     if (trie.containsKey(s)) trie.selectValue(s) else 0
 
   @inline
-  private final def prefix(s: String) = trie.select(s).getKey.startsWith(s)
+  private final def prefix(s: String) = trie.selectKey(s).startsWith(s)
 
   private final val k = 100000000L
 
-  def solve(s: String, limit: Int = 2500, timeoutMillis: Int = 5000): List[String] = {
+  def solve(s: String, limit: Int = 5000, timeoutMillis: Int = 5000): List[String] = {
     val chars = s.toLowerCase().toList.filter { c => c >= 'a' && c <= 'z'}
 
     val frontier = mutable.PriorityQueue[(String, List[String], List[Char], Long)]()(Ordering.by{case (w, ws, av, priority) => priority})
-    frontier += (("", Nil, chars, k))
+    frontier += (("", Nil, chars, 0))
 
     solve(mutable.ListBuffer[String](), frontier, limit, System.currentTimeMillis() + timeoutMillis)
   }
@@ -44,10 +44,10 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
         lazy val solution = (w :: ws).reverse.mkString(" ")
         if (dictionary(w) > 0 && !acc.contains(solution)) {
           acc += solution
-          if (acc.length > limit) return acc.toList
+          if (acc.length >= limit) return acc.toList
         }
       } else {
-        for (c: Char <- avail.toSet) {
+        for (c <- avail.distinct) {
           val s = w + c
           lazy val remain = avail diff List(c)
 
@@ -65,6 +65,7 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
 
       if (frontier.length % 100 == 0 // only check clock every ~100 iterations
         && System.currentTimeMillis() > timeoutAtMillis) return acc.toList
+
       solve(acc, frontier, limit, timeoutAtMillis)
     }
 
