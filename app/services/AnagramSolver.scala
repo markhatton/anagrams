@@ -30,19 +30,19 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
     val frontier = mutable.PriorityQueue[(String, List[String], List[Char], Long)]()(Ordering.by{case (w, ws, av, priority) => priority})
     frontier += (("", Nil, chars, 0))
 
-    solve(mutable.ListBuffer[String](), frontier, limit, System.currentTimeMillis() + timeoutMillis)
+    solve(mutable.ListBuffer[String](), frontier, mutable.HashSet[String](), limit, System.currentTimeMillis() + timeoutMillis)
   }
 
   @tailrec
-  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char], Long)], limit: Int, timeoutAtMillis: Long): List[String] =
+  private final def solve(acc: mutable.ListBuffer[String], frontier: mutable.PriorityQueue[(String, List[String], List[Char], Long)], solved: mutable.HashSet[String], limit: Int, timeoutAtMillis: Long): List[String] =
     if (frontier.isEmpty)
       acc.toList
     else {
       val (w, ws, avail, priority) = frontier.dequeue()
 
       if (avail.isEmpty) {
-        lazy val solution = (w :: ws).reverse.mkString(" ")
-        if (dictionary(w) > 0 && !acc.contains(solution)) {
+        val solution = (w :: ws).sorted.mkString(" ")
+        if (dictionary(w) > 0) {
           acc += solution
           if (acc.length >= limit) return acc.toList
         }
@@ -51,14 +51,19 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
           val s = w + c
           lazy val remain = avail diff List(c)
 
-          val unigramFreq = dictionary(s)
-          if (unigramFreq > 0) {
-            val freqs = unigramFreq :: ws.map(dictionary)
-            val _priority = -(ws.length + 1) * k + freqs.min
-            frontier += (("", s :: ws, remain, _priority))
+          val solution = (s :: ws).sorted.mkString(" ")
+          if (!solved.contains(solution)) {
+            solved.add(solution)
+
+            val unigramFreq = dictionary(s)
+            if (unigramFreq > 0) {
+              val freqs = unigramFreq :: ws.map(dictionary)
+              val _priority = -(ws.length + 1) * k + freqs.min
+              frontier += (("", s :: ws, remain, _priority))
+            }
+            if (prefix(s))
+              frontier += ((s, ws, remain, priority))
           }
-          if (prefix(s))
-            frontier += ((s, ws, remain, priority))
         }
 
       }
@@ -66,7 +71,7 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
       if (frontier.length % 100 == 0 // only check clock every ~100 iterations
         && System.currentTimeMillis() > timeoutAtMillis) return acc.toList
 
-      solve(acc, frontier, limit, timeoutAtMillis)
+      solve(acc, frontier, solved, limit, timeoutAtMillis)
     }
 
 }

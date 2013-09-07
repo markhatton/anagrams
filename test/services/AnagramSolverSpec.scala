@@ -15,11 +15,11 @@ class AnagramSolverSpec extends SpecificationWithJUnit with Mockito {
 
   val anagramSolver = new AnagramSolver(dictionary, unigrams)
 
-  val solutions = Set("a b c", "b a c", "b c a", "b a c", "a c b", "c b a", "a bc", "c a b", "ab c", "bc a", "c ab")
+  val solutions = Set("a b c", "a bc", "ab c")
 
   "An Anagrams Solver" should {
 
-    "solve anagrams"  in {
+    "solve unique anagrams"  in {
       anagramSolver.solve("a") must_== List("a")
       anagramSolver.solve("abc").toSet must_== solutions
       anagramSolver.solve("bac").toSet must_== solutions
