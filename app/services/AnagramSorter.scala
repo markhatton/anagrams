@@ -16,8 +16,11 @@ class AnagramSorter(unigrams: BinarySearchCSV) {
         })
     }.min
 
-  private def partitionAndTake(xs: List[String], p: Int, n: Int): List[String] =
-    xs.filter(_.split(' ').length == p).take(n)
+  private def partitionAndRemove(xs: mutable.ListBuffer[String], n: Int): Option[String] = {
+    val x = xs.filter(_.split(' ').length == n).headOption
+    x foreach(xs -= _)
+    x
+  }
 
   def sort(xs: List[String]): List[String] = {
     val memo = mutable.Map[String, Long]()
@@ -30,8 +33,17 @@ class AnagramSorter(unigrams: BinarySearchCSV) {
         bs.length > as.length
     }
 
-    {
-      for (n <- 1 to 10) yield partitionAndTake(sorted, n, 25)
-    }.flatten.toList
+    val results = mutable.ListBuffer[String]()
+    val input = mutable.ListBuffer[String](sorted:_*)
+    var n = 1
+    while (input.nonEmpty && results.length < 110) {
+      val x = partitionAndRemove(input, n)
+      x foreach results.+=
+      n = (n + 1) % 10
+    }
+
+    results.toList.sortWith{ case (a, b) =>
+      b.split(' ').length > a.split(' ').length
+    }
   }
 }

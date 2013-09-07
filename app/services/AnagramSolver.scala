@@ -22,7 +22,7 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
   @inline
   private final def prefix(s: String) = trie.select(s).getKey.startsWith(s)
 
-  private final val k = 1000000000L
+  private final val k = 100000000L
 
   def solve(s: String, limit: Int = 2500, timeoutMillis: Int = 5000): List[String] = {
     val chars = s.toLowerCase().toList.filter { c => c >= 'a' && c <= 'z'}
@@ -53,7 +53,8 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
 
           val unigramFreq = dictionary(s)
           if (unigramFreq > 0) {
-            val _priority = -(ws.length + 1) * k + unigramFreq
+            val freqs = unigramFreq :: ws.map(dictionary)
+            val _priority = -(ws.length + 1) * k + freqs.min
             frontier += (("", s :: ws, remain, _priority))
           }
           if (prefix(s))
