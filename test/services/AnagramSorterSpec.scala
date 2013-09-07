@@ -11,7 +11,8 @@ class AnagramSorterSpec extends SpecificationWithJUnit with Mockito {
   "An Anagram Sorter" should {
 
     val unigrams = mock[BinarySearchCSV]
-    val sorter = new AnagramSorter(unigrams)
+    val presenter = mock[AnagramPresenter]
+    val sorter = new AnagramSorter(unigrams, presenter)
 
     unigrams.find("a") returns Some(1L)
     unigrams.find("b") returns Some(2L)
@@ -19,8 +20,10 @@ class AnagramSorterSpec extends SpecificationWithJUnit with Mockito {
     unigrams.find("ab") returns Some(10L)
     unigrams.find("bc") returns Some(100L)
 
+    presenter.present(anyString) answers { s => (s.asInstanceOf[String], 1L) }
+
     "sort by the shortest number of words then minimum csv unigram value, descending and stable" in {
-      sorter.sort(List("a b c", "a bc", "ab c")) must_== List("ab c", "a bc", "a b c")
+      sorter.sort(List("a b c", "a bc", "ab c")) must_== List("ab c", "a b c", "a bc")
     }
 
   }

@@ -5,7 +5,7 @@ package services
 
 import collection.mutable
 
-class AnagramSorter(unigrams: BinarySearchCSV) {
+class AnagramSorter(unigrams: BinarySearchCSV, presenter: AnagramPresenter) {
 
   private def min(s: Array[String], memo: mutable.Map[String, Long]) =
     s.map{ w =>
@@ -42,8 +42,6 @@ class AnagramSorter(unigrams: BinarySearchCSV) {
       n = (n + 1) % 10
     }
 
-    results.toList.sortWith{ case (a, b) =>
-      b.split(' ').length > a.split(' ').length
-    }
+    results.toList.map(presenter.present).sortBy{ case (_, score) => -score }.map(_._1)
   }
 }

@@ -2,20 +2,24 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import services.{ShortWords, AnagramSorter, BinarySearchCSV, AnagramSolver}
+import services._
 import scala.io.Source
 import java.io.File
 
 object Application extends Controller {
 
-  val unigrams = {
-    val filename = Option(System.getProperty("unigrams")).getOrElse("/Users/markhatton/unigrams")
+  private def loadCsv(name: String) = {
+    val filename = Option(System.getProperty("name")).getOrElse(s"/Users/markhatton/$name")
     val unigramsFile = new File(filename)
     if (!unigramsFile.exists()) sys error s"unable to load input CSV file: $filename"
 
-    Logger.info(s"Loading unigrams from file: $filename")
+    Logger.info(s"Loading $name from file: $filename")
     new BinarySearchCSV(unigramsFile)
   }
+
+  val unigrams = loadCsv("unigrams")
+
+  val bigrams = loadCsv("bigrams")
 
   val anagramSolver = {
     val filename = Option(System.getProperty("dictionary")).getOrElse("/usr/share/dict/words")
@@ -29,8 +33,10 @@ object Application extends Controller {
     new AnagramSolver(dictionary, unigrams)
   }
 
+
   val sorter = {
-    new AnagramSorter(unigrams)
+    val presenter = new AnagramPresenter(unigrams, bigrams)
+    new AnagramSorter(unigrams, presenter)
   }
 
   def index = Action {
