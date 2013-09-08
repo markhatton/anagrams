@@ -9,7 +9,7 @@ import java.io.File
 object Application extends Controller {
 
   private def loadCsv(name: String) = {
-    val filename = Option(System.getProperty("name")).getOrElse(s"/Users/markhatton/$name")
+    val filename = Option(System.getProperty(name)).getOrElse(s"/Users/markhatton/$name")
     val unigramsFile = new File(filename)
     if (!unigramsFile.exists()) sys error s"unable to load input CSV file: $filename"
 
@@ -46,6 +46,8 @@ object Application extends Controller {
   def solve = Action { request =>
     request.getQueryString("s") match {
       case None =>
+        Redirect("/", 301)
+      case Some(s) if s.trim.isEmpty =>
         Redirect("/", 301)
       case Some(s) =>
         Ok(views.html.solve(anagramSolver, sorter, s))
