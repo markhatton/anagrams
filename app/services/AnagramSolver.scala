@@ -20,7 +20,7 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
 
   var iterations: Long = 0L // TODO: Mark 08/09/2013 - not thread safe
 
-  def solve(s: String, limit: Int = 50000, timeoutMillis: Int = 15000): List[String] = {
+  def solve(s: String, limit: Int = 50000, timeoutMillis: Int = 5000): List[String] = {
     val chars = s.toLowerCase().toList.filter { c => c >= 'a' && c <= 'z'}
 
     val frontier = mutable.PriorityQueue[(String, List[String], Long, List[Char], Long)]()(Ordering.by{case (w, ws, score, av, priority) => priority})
