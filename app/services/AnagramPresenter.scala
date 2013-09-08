@@ -18,7 +18,7 @@ class AnagramPresenter(unigrams: BinarySearchCSV, bigrams: BinarySearchCSV) {
           (p, score)
         }.sortBy{ case (_, score) => score }.last
 
-        (max._1.mkString(" "), max._2 / math.pow(ss.length, 4).toLong)
+        (max._1.mkString(" "), max._2 / math.pow(ss.length, 32).toLong)
     }
   }
 
