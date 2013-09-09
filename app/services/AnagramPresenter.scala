@@ -11,7 +11,8 @@ class AnagramPresenter(unigrams: BinarySearchCSV, bigrams: BinarySearchCSV) {
     ss.length match {
       case 1 =>
         (s, unigrams.find(s).getOrElse(1L))
-
+      case 2 =>
+        (s, bigrams.find(s).getOrElse(1L))
       case _ =>
         val max = ss.permutations.toList.map{ p =>
           val score = p.sliding(2).map(pair => bigrams.find(pair.mkString(" ")).getOrElse(1L)).min
