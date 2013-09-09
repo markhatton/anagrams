@@ -33,15 +33,15 @@ class AnagramSorter(unigrams: BinarySearchCSV, presenter: AnagramPresenter) {
         bs.length > as.length
     }
 
-    val results = mutable.ListBuffer[String]()
-    val input = mutable.ListBuffer[String](sorted:_*)
-    var n = 1
-    while (input.nonEmpty && results.length < 110) {
-      val x = partitionAndRemove(input, n)
-      x foreach results.+=
-      n = (n + 1) % 10
-    }
+//    val results = mutable.ListBuffer[String]()
+//    val input = mutable.ListBuffer[String](sorted:_*)
+//    var n = 1
+//    while (input.nonEmpty && results.length < 110) {
+//      val x = partitionAndRemove(input, n)
+//      x foreach results.+=
+//      n = (n + 1) % 10
+//    }
 
-    results.toList.map(presenter.present).sortBy{ case (_, score) => -score }.map(_._1)
+    sorted.toList.map(presenter.present).sortBy{ case (_, score) => -score }.map(_._1)
   }
 }
