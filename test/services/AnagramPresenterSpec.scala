@@ -16,7 +16,7 @@ class AnagramPresenterSpec extends SpecificationWithJUnit with Mockito {
     unigrams.find("a") returns Some(99)
 
     val input = "a b c"
-    val k = math.pow(3, 32).toLong
+    val k = math.pow(3, 4).toLong
     bigrams.find("a b") returns None
     bigrams.find("a c") returns Some(k)
     bigrams.find("b a") returns Some(2*k)
