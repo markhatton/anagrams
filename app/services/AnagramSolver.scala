@@ -5,10 +5,13 @@ package services
 
 import org.ardverk.collection.{StringKeyAnalyzer, PatriciaTrie}
 import scala.collection.mutable
-import scala.annotation.tailrec
 import play.api.Logger
 
-class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
+trait AnagramSolver {
+  def solve(s: String, limit: Int = 10000, timeoutMillis: Int = 5000): List[String]
+}
+
+class NativeAnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) extends AnagramSolver {
 
   private final val trie = {
     val t = new PatriciaTrie[String, Long](StringKeyAnalyzer.INSTANCE)
@@ -20,7 +23,7 @@ class AnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) {
 
   var iterations: Long = 0L // TODO: Mark 08/09/2013 - not thread safe
 
-  def solve(s: String, limit: Int = 50000, timeoutMillis: Int = 5000): List[String] = {
+  def solve(s: String, limit: Int, timeoutMillis: Int): List[String] = {
     val chars = s.toLowerCase().toList.filter { c => c >= 'a' && c <= 'z'}
 
     val frontier = mutable.PriorityQueue[(String, List[String], Long, List[Char], Long)]()(Ordering.by{case (w, ws, score, av, priority) => priority})
