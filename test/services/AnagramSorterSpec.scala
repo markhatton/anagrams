@@ -20,7 +20,7 @@ class AnagramSorterSpec extends SpecificationWithJUnit with Mockito {
     unigrams.find("ab") returns Some(10L)
     unigrams.find("bc") returns Some(100L)
 
-    presenter.present(anyString) answers { s => (s.asInstanceOf[String], 1L) }
+    presenter.present(anyString, any) answers { s => (s.asInstanceOf[String], 1L) }
 
     "sort by the shortest number of words then minimum csv unigram value, descending and stable" in {
       sorter.sort(List("a b c", "a bc", "ab c")) must_== List("ab c", "a bc", "a b c")

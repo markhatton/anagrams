@@ -5,6 +5,7 @@ package services
 
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.mock.Mockito
+import collection.mutable
 
 class AnagramPresenterSpec extends SpecificationWithJUnit with Mockito {
 
@@ -27,12 +28,12 @@ class AnagramPresenterSpec extends SpecificationWithJUnit with Mockito {
     val presenter = new AnagramPresenter(unigrams, bigrams)
 
     "sort words in input using maximum scoring bigrams permutation" in {
-      val result = presenter.present(input)
+      val result = presenter.present(input, mutable.Map[String, Long]())
       result must_== ("b c a", 3)
     }
 
     "lookup unigrams for single-word anagrams" in {
-      val result = presenter.present("a")
+      val result = presenter.present("a", mutable.Map[String, Long]())
       result must_== ("a", 99)
     }
 
