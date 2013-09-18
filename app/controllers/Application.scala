@@ -1,6 +1,7 @@
 package controllers
 
 import play.api._
+import play.api.libs.json.Json
 import play.api.mvc._
 import services._
 import scala.io.Source
@@ -56,13 +57,21 @@ object Application extends Controller {
   }
 
   def solve = Action { request =>
-    request.getQueryString("s") match {
-      case None =>
-        Redirect("/", 301)
-      case Some(s) if s.trim.isEmpty =>
-        Redirect("/", 301)
-      case Some(s) =>
-        Ok(views.html.solve(anagramSolver, sorter, s))
+    request match {
+      case Accepts.Html() =>
+        request.getQueryString("s") match {
+          case s if s.isEmpty || s.get.trim.isEmpty =>
+            Redirect("/", 301)
+          case Some(s) =>
+            Ok(views.html.solve(anagramSolver, sorter, s))
+        }
+      case _ =>
+        request.getQueryString("s") match {
+          case s if s.isEmpty || s.get.trim.isEmpty =>
+            BadRequest
+          case Some(s) =>
+            Ok(Json.toJson(Map("solutions"->sorter.sort(anagramSolver.solve(s)))))
+        }
     }
   }
 
