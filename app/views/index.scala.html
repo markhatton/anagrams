@@ -9,6 +9,17 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
     <script src="/assets/javascripts/anagrams.js"></script>
     <script type="text/javascript">
+        var solutionsCache = {};
+        function getQueryParams() {
+            var params = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for(var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                params.push(hash[0]);
+                params[hash[0]] = decodeURIComponent(hash[1]);
+            }
+            return params;
+        }
         function clear() {
             var sols = $("#solutions");
             sols.html('');
@@ -21,34 +32,61 @@
         function no_spinner() {
             $("#spinner").css('display', 'none');
         }
-        $(function() {
-            $("#submit").click(function(){
-                clear();
-                var s = $.trim(escape($("#s").val()));
-                if (s.length == 0) {
-                    return;
-                }
-                spinner();
-                solve(s, function(response){
-                    var solutions = response.solutions;
-                    var html = "<h3>Anagrams of &quot;" + s + "&quot;</h3>";
+        function ajax_solve() {
+            var s = $.trim($("#s").val());
+            clear();
+            if (s.length == 0) {
+                return;
+            }
+            spinner();
+            solve(s, function(response){
+                var solutions = response.solutions;
+                solutionsCache[s] = solutions;
+                output_solutions(s, solutions);
+            });
+        }
+        function output_solutions(s, solutions) {
+            var html = "<h3>Anagrams of &quot;" + escape(s) + "&quot;</h3>";
 
-                    if (solutions.length == 0) {
-                        html += "<em>No anagrams found</em>";
-                    } else {
-                        html += "<ol>";
-                        $.each(solutions, function(i, sol) {
-                            if (i < 100)
-                                html += "<li>" + escape(sol) + "</li>";
-                        });
-                        html += "</ol>";
-                    }
-
-                    no_spinner();
-                    var sols = $("#solutions");
-                    sols.html(html);
-                    sols.css('display', 'block');
+            if (solutions.length == 0) {
+                html += "<em>No anagrams found</em>";
+            } else {
+                html += "<ol>";
+                $.each(solutions, function(i, sol) {
+                    if (i < 100)
+                        html += "<li>" + escape(sol) + "</li>";
                 });
+                html += "</ol>";
+            }
+
+            no_spinner();
+            var sols = $("#solutions");
+            sols.html(html);
+            sols.css('display', 'block');
+        }
+        $(function() {
+            $("#s").val(getQueryParams()['s']);
+            ajax_solve();
+
+            $(window).bind('popstate', function(e) {
+                var s = getQueryParams()['s'];
+                $("#s").val(s);
+                if (solutionsCache[s])
+                    output_solutions(s, solutionsCache[s]);
+                else
+                    ajax_solve();
+            });
+
+            $("#submit").click(function() {
+                var s = $.trim($("#s").val());
+                history.pushState(null, '', '?s='+s);
+                ajax_solve();
+            });
+
+            $('#s').bind('keyup',function (event){
+                if (event.keyCode === 13){
+                    $("#submit").trigger('click');
+                }
             });
         });
     </script>
@@ -60,10 +98,8 @@
         <h2>Anagram Solver</h2>
     </div>
     <p>Enter a word or phrase:
-        <form action="#">
-            <input id="s" type="text" style="min-width: 400px" value=""></input>
-            <input id="submit" type="submit" value="Go"/>
-        </form>
+        <input id="s" type="text" style="min-width: 400px" value=""></input>
+        <input id="submit" type="submit" value="Go"/>
     </p>
     <div id="spinner" style="display: none;"><p>Thinking ...</p><img src="/assets/images/spinner.gif"/></div>
     <div id="solutions" style="display: none;"></div>
