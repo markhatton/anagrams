@@ -7,6 +7,51 @@
     <!-- Bootstrap -->
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+    <script src="/assets/javascripts/anagrams.js"></script>
+    <script type="text/javascript">
+        function clear() {
+            var sols = $("#solutions");
+            sols.html('');
+            sols.css('display', 'none');
+            no_spinner();
+        }
+        function spinner() {
+            $("#spinner").css('display', 'block');
+        }
+        function no_spinner() {
+            $("#spinner").css('display', 'none');
+        }
+        $(function() {
+            $("#submit").click(function(){
+                clear();
+                var s = $.trim(escape($("#s").val()));
+                if (s.length == 0) {
+                    return;
+                }
+                spinner();
+                solve(s, function(response){
+                    var solutions = response.solutions;
+                    var html = "<h3>Anagrams of &quot;" + s + "&quot;</h3>";
+
+                    if (solutions.length == 0) {
+                        html += "<em>No anagrams found</em>";
+                    } else {
+                        html += "<ol>";
+                        $.each(solutions, function(i, sol) {
+                            if (i < 100)
+                                html += "<li>" + escape(sol) + "</li>";
+                        });
+                        html += "</ol>";
+                    }
+
+                    no_spinner();
+                    var sols = $("#solutions");
+                    sols.html(html);
+                    sols.css('display', 'block');
+                });
+            });
+        });
+    </script>
 </head>
 <body>
 
@@ -14,12 +59,14 @@
     <div class="page-header">
         <h2>Anagram Solver</h2>
     </div>
-    <form action="/solve">
-        <p>Enter a word or phrase:
-            <input type="text" name="s" style="min-width: 400px" value=""></input>
-            <input type="submit" value="Go"/>
-        </p>
-    </form>
+    <p>Enter a word or phrase:
+        <form action="#">
+            <input id="s" type="text" style="min-width: 400px" value=""></input>
+            <input id="submit" type="submit" value="Go"/>
+        </form>
+    </p>
+    <div id="spinner" style="display: none;"><p>Thinking ...</p><img src="/assets/images/spinner.gif"/></div>
+    <div id="solutions" style="display: none;"></div>
 </div>
 
 </body>
