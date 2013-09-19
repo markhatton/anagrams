@@ -79,7 +79,7 @@
 
             $("#submit").click(function() {
                 var s = $.trim($("#s").val());
-                history.pushState(null, '', '?s='+s);
+                history.pushState(null, '', '?s='+encodeURIComponent(s));
                 ajax_solve();
             });
 
