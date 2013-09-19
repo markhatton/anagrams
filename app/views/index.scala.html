@@ -38,16 +38,19 @@
             if (s.length == 0) {
                 return;
             }
+            if (solutionsCache[s]) {
+                output_solutions(s);
+                return;
+            }
             spinner();
             solve(s, function(response){
-                var solutions = response.solutions;
-                solutionsCache[s] = solutions;
-                output_solutions(s, solutions);
+                solutionsCache[s] = response.solutions;
+                output_solutions(s);
             });
         }
-        function output_solutions(s, solutions) {
+        function output_solutions(s) {
             var html = "<h3>Anagrams of &quot;" + escape(s) + "&quot;</h3>";
-
+            var solutions = solutionsCache[s];
             if (solutions.length == 0) {
                 html += "<em>No anagrams found</em>";
             } else {
@@ -71,10 +74,7 @@
             $(window).bind('popstate', function(e) {
                 var s = getQueryParams()['s'];
                 $("#s").val(s);
-                if (solutionsCache[s])
-                    output_solutions(s, solutionsCache[s]);
-                else
-                    ajax_solve();
+                ajax_solve();
             });
 
             $("#submit").click(function() {
