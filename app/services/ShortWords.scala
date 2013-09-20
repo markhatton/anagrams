@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 zeebox
+ * Copyright (c) 2013 Mark Hatton
  */
 package services
 
