@@ -42,6 +42,7 @@ class AnagramSorter(unigrams: BinarySearchCSV, presenter: AnagramPresenter) {
 //      n = (n + 1) % 10
 //    }
 
+    memo.clear();
     sorted.take(110).toList.map(sol => presenter.present(sol, memo)).sortBy{ case (_, score) => -score }.map(_._1)
   }
 }
