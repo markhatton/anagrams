@@ -7,11 +7,15 @@ import java.io.{RandomAccessFile, File}
 import java.nio.channels.FileChannel
 import java.nio.MappedByteBuffer
 
+trait CSV {
+  def find(key: String): Option[Long]
+}
+
 /**
  * Loads file into memory and assumes it is a sorted, tab-separated "CSV".  The CSV may then
  * be searched by its key (first column) and its value if found (second column) is returned
  */
-class BinarySearchCSV(file: File) {
+class BinarySearchCSV(file: File) extends CSV {
 
   private final val raFile = new RandomAccessFile(file, "r")
 

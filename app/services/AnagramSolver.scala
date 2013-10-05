@@ -11,7 +11,7 @@ trait AnagramSolver {
   def solve(s: String, limit: Int = 10000, timeoutMillis: Int = 5000): List[String]
 }
 
-class NativeAnagramSolver(_dictionary: Set[String], unigrams: BinarySearchCSV) extends AnagramSolver {
+class NativeAnagramSolver(_dictionary: Set[String], unigrams: CSV) extends AnagramSolver {
 
   private final val trie = {
     val t = new PatriciaTrie[String, Long](StringKeyAnalyzer.INSTANCE)

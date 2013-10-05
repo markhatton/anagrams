@@ -9,12 +9,16 @@ import java.io.File
 
 object Application extends Controller {
 
-  private def loadCsv(name: String, filename: String) = {
+  private def loadCsv(name: String, filename: String) = try {
     val unigramsFile = new File(filename)
-    if (!unigramsFile.exists()) sys error s"unable to load input CSV file: $filename"
-
+    if (!unigramsFile.exists()) Logger warn s"unable to load input CSV file: $filename, anagrams will not be ranked"
     Logger.info(s"Loading $name from file: $filename")
     new BinarySearchCSV(unigramsFile)
+  } catch {
+    case e: Exception =>
+      new CSV {
+        def find(key: String) = None
+      }
   }
 
   val cppExecutable = System.getProperty("anagrams-cpp", "/Users/markhatton/Src/Mark/anagrams-cpp/anagrams")

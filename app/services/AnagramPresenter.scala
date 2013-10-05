@@ -5,7 +5,7 @@ package services
 
 import collection.mutable
 
-class AnagramPresenter(unigrams: BinarySearchCSV, bigrams: BinarySearchCSV) {
+class AnagramPresenter(unigrams: CSV, bigrams: CSV) {
 
   def present(s: String, memo: mutable.Map[String, Long]): (String, Long) = {
     val ss = s.split(' ')

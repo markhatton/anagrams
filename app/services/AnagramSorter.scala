@@ -5,7 +5,7 @@ package services
 
 import collection.mutable
 
-class AnagramSorter(unigrams: BinarySearchCSV, presenter: AnagramPresenter) {
+class AnagramSorter(unigrams: CSV, presenter: AnagramPresenter) {
 
   private def min(s: Array[String], memo: mutable.Map[String, Long]) =
     s.map{ w =>
