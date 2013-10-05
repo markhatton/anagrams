@@ -50,27 +50,41 @@ object Application extends Controller {
     val presenter = new AnagramPresenter(unigrams, bigrams)
     new AnagramSorter(unigrams, presenter)
   }
+  
+  
+  private val BotUserAgent = """^[A-Za-z0-9]+[Bb][Oo][Tt]/.*""".r
 
+  private def showIndex = Ok(views.html.index())
 
-  def index = Action {
-    Ok(views.html.index())
+  def index = Action { request =>
+    request.headers.get("User-Agent") match {
+      case Some(BotUserAgent()) =>
+        request.getQueryString("s") match {
+          case Some(s) if s.trim.nonEmpty =>
+            Ok(views.html.solve(anagramSolver, sorter, s))  // non-JS route for bots
+          case _ =>
+            showIndex
+        }
+      case _ =>
+        showIndex
+    }
   }
 
   def solve = Action { request =>
     request match {
       case Accepts.Html() =>
         request.getQueryString("s") match {
-          case s if s.isEmpty || s.get.trim.isEmpty =>
+          case Some(s) if s.trim.nonEmpty =>
+            Redirect(s"/?s=$s", 301)
+          case _ =>
             Redirect("/", 301)
-          case Some(s) =>
-            Ok(views.html.solve(anagramSolver, sorter, s))
         }
       case _ =>
         request.getQueryString("s") match {
-          case s if s.isEmpty || s.get.trim.isEmpty =>
-            BadRequest
-          case Some(s) =>
+          case Some(s) if s.trim.nonEmpty =>
             Ok(Json.toJson(Map("solutions"->sorter.sort(anagramSolver.solve(s)))))
+          case _ =>
+            BadRequest
         }
     }
   }
