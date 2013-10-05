@@ -13,7 +13,7 @@ class AnagramSolverSpec extends SpecificationWithJUnit with Mockito {
   val unigrams = mock[BinarySearchCSV]
   unigrams.find(any) returns None
 
-  val anagramSolver = new AnagramSolver(dictionary, unigrams)
+  val anagramSolver = new NativeAnagramSolver(dictionary, unigrams)
 
   val solutions = Set("a b c", "a bc", "ab c")
 
@@ -34,7 +34,7 @@ class AnagramSolverSpec extends SpecificationWithJUnit with Mockito {
     }
 
     "ignore case" in {
-      new AnagramSolver(dictionary map (_.toUpperCase()), unigrams).solve("AbC").toSet must_== solutions
+      new NativeAnagramSolver(dictionary map (_.toUpperCase()), unigrams).solve("AbC").toSet must_== solutions
     }
 
     "return no solutions" in {

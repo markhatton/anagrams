@@ -16,8 +16,7 @@ class AnagramPresenterSpec extends SpecificationWithJUnit with Mockito {
 
     unigrams.find("a") returns Some(99)
 
-    val input = "a b c"
-    val k = math.pow(3, 4).toLong
+    val k = math.pow(3, 6).toLong
     bigrams.find("a b") returns None
     bigrams.find("a c") returns Some(k)
     bigrams.find("b a") returns Some(2*k)
@@ -28,7 +27,7 @@ class AnagramPresenterSpec extends SpecificationWithJUnit with Mockito {
     val presenter = new AnagramPresenter(unigrams, bigrams)
 
     "sort words in input using maximum scoring bigrams permutation" in {
-      val result = presenter.present(input, mutable.Map[String, Long]())
+      val result = presenter.present("a b c", mutable.Map[String, Long]())
       result must_== ("b c a", 3)
     }
 

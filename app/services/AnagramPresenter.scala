@@ -24,7 +24,7 @@ class AnagramPresenter(unigrams: BinarySearchCSV, bigrams: BinarySearchCSV) {
         val max = ss.permutations.take(10000).toList.map{ p =>
           val score = p.sliding(2).map(pair => getBigram(pair.mkString(" "))).min
           (p, score)
-        }.sortBy{ case (_, score) => score }.last
+        }.maxBy{ case (_, score) => score }
 
       (max._1.mkString(" "), max._2 / (if (ss.length <= 2) 1L
                                        else math.pow(ss.length, 6).toLong)
