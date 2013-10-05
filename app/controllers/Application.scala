@@ -52,13 +52,13 @@ object Application extends Controller {
   }
   
   
-  private val BotUserAgent = """^.*\([^;]*;.*[A-Za-z0-9]+[Bb][Oo][Tt]/.*""".r
+  private val BotUserAgent = """^.*\([^;]*;.*[A-Za-z0-9]+[Bb][Oo][Tt](-[A-Za-z0-9]+)?/.*""".r
 
   private def showIndex = Ok(views.html.index())
 
   def index = Action { request =>
     request.headers.get("User-Agent") match {
-      case Some(BotUserAgent()) =>
+      case Some(BotUserAgent(_)) =>
         request.getQueryString("s") match {
           case Some(s) if s.trim.nonEmpty =>
             Ok(views.html.solve(anagramSolver, sorter, s))  // non-JS route for bots
