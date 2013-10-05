@@ -52,7 +52,7 @@ object Application extends Controller {
   }
   
   
-  private val BotUserAgent = """^[A-Za-z0-9]+[Bb][Oo][Tt]/.*""".r
+  private val BotUserAgent = """^.*\([^;]*;.*[A-Za-z0-9]+[Bb][Oo][Tt]/.*""".r
 
   private def showIndex = Ok(views.html.index())
 
