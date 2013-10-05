@@ -5,17 +5,18 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import services._
 import scala.io.Source
-import java.io.File
+import java.io.{FileNotFoundException, File}
 
 object Application extends Controller {
 
   private def loadCsv(name: String, filename: String) = try {
     val unigramsFile = new File(filename)
-    if (!unigramsFile.exists()) Logger warn s"unable to load input CSV file: $filename, anagrams will not be ranked"
+    if (!unigramsFile.exists()) throw new FileNotFoundException(filename)
     Logger.info(s"Loading $name from file: $filename")
     new BinarySearchCSV(unigramsFile)
   } catch {
     case e: Exception =>
+      Logger warn(s"unable to load input CSV file: $filename, anagrams will not be ranked", e)
       new CSV {
         def find(key: String) = None
       }
