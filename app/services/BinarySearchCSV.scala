@@ -19,33 +19,43 @@ class BinarySearchCSV(file: File) extends CSV {
 
   private final val raFile = new RandomAccessFile(file, "r")
 
-  private final val length = raFile.length.toInt
+  private final val length = raFile.length
 
-  private final val buf = new ThreadLocal[MappedByteBuffer] {
-    override def initialValue = {
-      raFile.getChannel.map(FileChannel.MapMode.READ_ONLY, 0, length)
+  private final val bufs: Array[ThreadLocal[MappedByteBuffer]] = {
+    0.toLong to length / Integer.MAX_VALUE map { case i =>
+      new ThreadLocal[MappedByteBuffer] {
+        override def initialValue = {
+          raFile.getChannel.map(
+            FileChannel.MapMode.READ_ONLY,
+            i * Integer.MAX_VALUE,
+            math.min(Integer.MAX_VALUE, length - i * Integer.MAX_VALUE)
+          )
+        }
+      }
     }
-  }
+  }.toArray
 
-  buffer.load()
+//  buffer.load()
 
   def find(key: String): Option[Long] = {
     find(key, 0, length)
   }
 
-  private final def buffer = buf.get
-
-  private final def find(key: String, lBound: Integer, uBound: Integer): Option[Long] = {
+  private final def find(key: String, lBound: Long, uBound: Long): Option[Long] = {
     if (lBound == uBound) return None
     val midpoint = lBound + (uBound - lBound) / 2
 
-    buffer.position(midpoint)
-    rewind()
+    val idx = midpoint / Integer.MAX_VALUE
+    val buffer = bufs(idx.toInt).get
 
-    if (buffer.position() < lBound) return None
+    val position = (midpoint - idx * Integer.MAX_VALUE).toInt
+    buffer.position(position)
+    rewind(buffer)
+
+    if (buffer.position() + idx * Integer.MAX_VALUE < lBound) return None
 
     val (k, v) = {
-      val kv = readLine().split('\t')
+      val kv = readLine(buffer).split('\t')
       (kv(0), kv(1).toLong)
     }
 
@@ -58,7 +68,7 @@ class BinarySearchCSV(file: File) extends CSV {
     }
   }
 
-  private final def rewind() {
+  private final def rewind(buffer: MappedByteBuffer) {
     var pos = buffer.position()
     var b = buffer.get(pos)
     while (b != '\n') {
@@ -71,7 +81,7 @@ class BinarySearchCSV(file: File) extends CSV {
     buffer.position(pos + 1)
   }
 
-  private final def readLine(): String = {
+  private final def readLine(buffer: MappedByteBuffer): String = {
     var b = buffer.get
     val bs = new StringBuilder
     while (b != '\n') {

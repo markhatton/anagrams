@@ -28,9 +28,13 @@ object Application extends Controller {
 
   val bigramsFile = System.getProperty("bigrams", "/Users/markhatton/bigrams")
 
+  val trigramsFile = System.getProperty("trigrams", "/Users/markhatton/trigrams")
+
   val unigrams = loadCsv("unigrams", unigramsFile)
 
   val bigrams = loadCsv("bigrams", bigramsFile)
+
+  val trigrams = loadCsv("trigrams", trigramsFile)
 
   val anagramSolver: AnagramSolver = System.getProperty("solver", "native") match {
     case "external" =>
@@ -52,7 +56,7 @@ object Application extends Controller {
   }
 
   val sorter = {
-    val presenter = new AnagramPresenter(unigrams, bigrams)
+    val presenter = new AnagramPresenter(unigrams, bigrams, trigrams)
     new AnagramSorter(unigrams, presenter)
   }
   

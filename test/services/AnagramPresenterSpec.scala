@@ -13,6 +13,7 @@ class AnagramPresenterSpec extends SpecificationWithJUnit with Mockito {
 
     val unigrams = mock[BinarySearchCSV]
     val bigrams = mock[BinarySearchCSV]
+    val trigrams = mock[BinarySearchCSV]
 
     unigrams.find("a") returns Some(99)
 
@@ -24,7 +25,7 @@ class AnagramPresenterSpec extends SpecificationWithJUnit with Mockito {
     bigrams.find("c a") returns Some(4*k)
     bigrams.find("c b") returns Some(5*k)
 
-    val presenter = new AnagramPresenter(unigrams, bigrams)
+    val presenter = new AnagramPresenter(unigrams, bigrams, trigrams)
 
     "sort words in input using maximum scoring bigrams permutation" in {
       val result = presenter.present("a b c", mutable.Map[String, Long]())
